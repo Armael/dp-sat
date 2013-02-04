@@ -35,6 +35,18 @@ let rec iter_tail f = function
   | [] -> ()
   | x::xs -> f x xs; iter_tail f xs
 
+(* Just like List.fold_left, but the function f returns a couple
+   (continue?, new_acc). If continue? = false, we return new_acc,
+   otherwise we continue the iteration (like a normal fold)
+*)
+let rec fold_stop f acc = function
+  | [] -> acc
+  | x::xs -> let (continue, new_acc) = f acc x in
+             if continue then
+               fold_stop f new_acc xs
+             else
+               new_acc
+
 (* Just like List.map, but removes items for which f returns []. *)
 let rec map_skip f = function
   | [] -> []
