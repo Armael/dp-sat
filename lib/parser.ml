@@ -40,3 +40,4 @@ let parse filename =
    with End_of_file -> ());
   close_in chan;
   (!nb_vars, !nb_clauses, !clauses)
+

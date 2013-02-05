@@ -138,5 +138,8 @@ let sat nb_vars nb_clauses clauses =
       buckets.(k) <- ([], []);
 
     ) buckets_seq;
+
+    (* Here we know the problem is SAT. We have to find an assignation
+       of the variables *)
     Sat []
   ) with Unsat_exc -> Unsat
