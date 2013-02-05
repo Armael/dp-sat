@@ -5,11 +5,6 @@ let die msg =
   print_endline msg;
   exit 1
 
-(* Returns the list [a; a+1; ...; b] *)
-let rec seq a b =
-  if a > b then []
-  else a::(seq (a+1) b)
-
 (* Returns the position in the string s of the first non blank
    character, bundled in an option type : if the string is entirely
    blank, None is returned *)
@@ -19,6 +14,15 @@ let strip_begin s =
     incr i
   done;
   (if !i < String.length s then Some !i else None)
+
+(*
+ * Utility functions on list (iterators,…)
+ *)
+
+(* Returns the list [a; a+1; ...; b] *)
+let rec seq a b =
+  if a > b then []
+  else a::(seq (a+1) b)
 
 (* Just like List.fold_left, but also pass to the function f the list
    of the elements after the current one.
@@ -78,3 +82,10 @@ let rec merge_sorted compare l1 l2 = match (l1, l2) with
   | (x::xs, y::ys) -> if compare x y < 0 then
       x::(merge_sorted compare xs (y::ys)) else
       y::(merge_sorted compare (x::xs) ys)
+
+(*
+ * Utility functions on tuples
+ *)
+
+let put_fst (a, b) f = (f a, b)
+let put_snd (a, b) f = (a, f b)
