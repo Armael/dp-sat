@@ -101,3 +101,4 @@ let merge_sorted_tr compare l1 l2 =
 
 let put_fst (a, b) f = (f a, b)
 let put_snd (a, b) f = (a, f b)
+let map2 f (a, b) = (f a, f b)
