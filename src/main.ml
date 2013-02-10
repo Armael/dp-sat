@@ -1,6 +1,10 @@
 open Prelude
 
-module Sat = Putnam
+module Sat = Putnam.Solver
+  (struct
+    let compare = compare
+    let verbosity = 1
+   end)
 
 let _ =
   if Array.length Sys.argv = 1 then
@@ -11,6 +15,5 @@ let _ =
     (match Sat.sat nb_vars nb_clauses clauses with
     | Sat.Unsat -> Printf.printf "Unsat"
     | Sat.Sat l -> Printf.printf "Sat\n";
-      Pretty.list (Pretty.list Pretty.int) l
-    | Sat.Unknown -> Printf.printf "Unknown");
+      Pretty.list (Pretty.list Pretty.int) l);
     print_newline ()
