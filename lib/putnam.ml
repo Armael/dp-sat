@@ -121,8 +121,10 @@ struct
           "Current bucket : %d (%d clauses)\n%!" k (nb_clauses buckets.(k)));
 
         debug 2 (fun () -> Printf.printf "Contenu : \n";
-          CSet.iter (fun c -> Pretty.list Pretty.int c; print_newline ()) (fst buckets.(k));
-          CSet.iter (fun c -> Pretty.list Pretty.int c; print_newline ()) (snd buckets.(k)));
+          CSet.iter (fun c -> Pretty.list Pretty.int c; print_newline ())
+            (fst buckets.(k));
+          CSet.iter (fun c -> Pretty.list Pretty.int c; print_newline ())
+            (snd buckets.(k)));
         
         CSet.iter (fun c1 ->
           CSet.iter (fun c2 ->
