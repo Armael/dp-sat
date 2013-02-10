@@ -80,10 +80,10 @@ type output =
 let sat nb_vars nb_clauses clauses =
   let clauses = pre clauses in
 
-  (* Here we implement a small optimization : we have, in place of a
+  (* Here we implement a small optimization : we have, instead of a
      single bucket, a double bucket. For a given variable x, the first
-     bucket contains clauses containing x, the second the clauses
-     containing -x. This way, we don't have to try to merge a
+     bucket contains clauses with head x, the second the clauses with
+     head -x. This way, we don't have to try to merge a
      x-containing-clause with an other x-containing-clause (same with
      -x) *)
   let buckets = Array.make nb_vars ([], []) in
