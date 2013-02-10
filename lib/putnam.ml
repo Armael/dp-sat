@@ -42,13 +42,17 @@ let compare_vars =
   (* We first sort by index of the variable, and in case of equality, x
      comes before (not x) *)
   lexico [(fun x y -> compare (abs y) (abs x)); 
-          (fun x y -> compare y x)]
+          (fun x y -> Pervasives.compare y x)] (* put x before -x *)
 
-let check_trivial_sat = function
-  | [] -> []
-  | [x] -> [x]
-  | x::y::xs as l -> if x = -y then []
-    else l
+let remove_dup_opp l =
+  let rec aux acc = function
+    | [] -> List.rev acc
+    | [x] -> List.rev (x::acc)
+    | x::y::xs -> if x = y then aux (x::acc) xs
+      else if x = -y then []
+      else aux (x::acc) (y::xs) in
+  let l' = aux [] l in
+  l'
 
 (* Some pretreatmets on the clauses list to optimize things *)
 let pre clauses =
@@ -62,7 +66,8 @@ let pre clauses =
      satisfiable).
   *)
   let sort c = List.sort compare_vars c in
-  map_skip (fun c -> c |> sort |> remove_dup |> check_trivial_sat) clauses
+  (* map_skip removes empty clauses *)
+  map_skip (fun c -> c |> sort |> remove_dup_opp) clauses
 
 (* Raised when we find an empty clause in the buckets *)
 exception Unsat_exc
@@ -94,6 +99,13 @@ let sat nb_vars nb_clauses clauses =
     else 
       buckets.(i-1) <- put_snd buckets.(i-1) concat in
 
+  let clean i =
+    let cln b = remove_dup (List.sort Pervasives.compare b) in
+    buckets.(i) <- map2 cln buckets.(i) in
+
+  let nb_clauses b =
+    (List.length (fst b)) + (List.length (snd b)) in
+
   List.iter put clauses;
 
   (* We have to know in each order examine the variables, so we sort
@@ -104,41 +116,44 @@ let sat nb_vars nb_clauses clauses =
 
   try (
     List.iter (fun k ->
-      debug 1 (fun () -> Printf.printf
-        "Current bucket : %d (%d clauses)\n%!"
-        k ((List.length (fst buckets.(k))) + (List.length (snd buckets.(k)))));
 
+      debug 1 (fun () -> Printf.printf
+        "Current buckets : %d. %d clauses before cleaning" k (nb_clauses buckets.(k)));
+
+      (* We remove duplicated clauses in the bucket before we iterate on it *)
+      clean k;
+
+      debug 1 (fun () -> Printf.printf
+        ", %d after\n%!" (nb_clauses buckets.(k)));
+      debug 2 (fun () -> Printf.printf "Contenu : \n";
+        List.iter (fun c -> Pretty.list Pretty.int c; print_newline ()) (fst buckets.(k));
+        List.iter (fun c -> Pretty.list Pretty.int c; print_newline ()) (snd buckets.(k)));
+      
       List.iter (fun c1 ->
         List.iter (fun c2 ->
           (* Because of the "double-bucket mechanism", we know that c1
              is of the form [k, ...] and c2 : [-k, ...] so we can
              merge them *)
-          debug 2 (fun () -> Pretty.list Pretty.int c1; print_string " -- ";
+          debug 3 (fun () -> Pretty.list Pretty.int c1; print_string " -- ";
             Pretty.list Pretty.int c2);
           (try (
-            let merged = merge_sorted compare_vars (List.tl c1) (List.tl c2) 
-                   |> remove_dup in
+            let merged = merge_sorted_tr compare_vars (List.tl c1) (List.tl c2) in
             if merged = [] then raise Unsat_exc
             else (
-              let merged = check_trivial_sat merged in
+              let merged = remove_dup_opp merged in
               if merged <> [] then (
-                debug 2 (fun () -> 
+                debug 3 (fun () -> 
                   print_string " -> "; Pretty.list Pretty.int merged);
                 put merged;
               )
             )
            ) with Failure "hd" -> raise Unsat_exc); (* We found an empty clause
                                                        somewhere *)
-          debug 2 (fun () -> print_endline "");
+          debug 3 (fun () -> print_endline "");
         ) (snd buckets.(k))
       ) (fst buckets.(k));
 
-      (* We can empty this double-bucket to free a little memory, it will not
-         be useful anymore *)
-      buckets.(k) <- ([], []);
-
     ) buckets_seq;
-
     (* Here we know the problem is SAT. We have to find an assignation
        of the variables *)
     Sat []
