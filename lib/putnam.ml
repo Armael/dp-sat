@@ -134,7 +134,7 @@ struct
             debug 3 (fun () -> Pretty.list Pretty.int c1; print_string " -- ";
               Pretty.list Pretty.int c2);
             (try (
-              let merged = merge_sorted_tr compare_vars (List.tl c1) (List.tl c2) in
+              let merged = merge_sorted compare_vars (List.tl c1) (List.tl c2) in
               if merged = [] then raise Unsat_exc
               else (
                 let merged = remove_dup_opp merged in
