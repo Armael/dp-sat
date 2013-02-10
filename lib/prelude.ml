@@ -68,12 +68,15 @@ let map_skip_tr f l =
       | y -> aux (y::acc) xs in
   aux [] l
 
-(* Remove duplicates in a sorted list *)
-let rec remove_dup = function
-  | [] -> []
-  | [x] -> [x]
-  | x::y::xs -> x::(if x = y then remove_dup xs
-    else remove_dup (y::xs))
+(* Remove duplicates in a sorted list.
+   Tail-rec version *)
+let remove_dup l =
+  let rec aux acc = function
+    | [] -> acc
+    | [x] -> x::acc
+    | x::y::xs -> if x = y then aux acc (x::xs)
+    else aux (x::acc) (y::xs) in
+  List.rev (aux [] l)
 
 (* Merge two sorted lists in a sorted list *)
 let rec merge_sorted compare l1 l2 = match (l1, l2) with
@@ -82,6 +85,15 @@ let rec merge_sorted compare l1 l2 = match (l1, l2) with
   | (x::xs, y::ys) -> if compare x y < 0 then
       x::(merge_sorted compare xs (y::ys)) else
       y::(merge_sorted compare (x::xs) ys)
+
+let merge_sorted_tr compare l1 l2 =
+  let rec aux acc l1 l2 = match (l1, l2) with
+    | ([], _) -> List.rev_append acc l2
+    | (_, []) -> List.rev_append acc l1
+    | (x::xs, y::ys) -> if compare x y < 0 then
+        aux (x::acc) xs (y::ys) else
+        aux (y::acc) (x::xs) ys in
+  aux [] l1 l2
 
 (*
  * Utility functions on tuples
