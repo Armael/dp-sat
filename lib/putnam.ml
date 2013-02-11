@@ -82,7 +82,7 @@ struct
 
   type output =
   | Unsat
-  | Sat of int list list
+  | Sat of int list
 
   let sat nb_vars nb_clauses clauses =
     let clauses = pre clauses in
