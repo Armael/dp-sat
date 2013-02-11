@@ -18,3 +18,5 @@ let list pp_item l =
   Printf.printf "[";
     print_content l;
     Printf.printf "]"
+
+let int_list = list int

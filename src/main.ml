@@ -1,10 +1,14 @@
 open Prelude
+open Sigs
+
+(* We choose a standard order on the variables' index *)
+module O = struct
+  let compare = compare
+end
 
 module Sat = Putnam.Solver
-  (struct
-    let compare = compare
-    let verbosity = 1
-   end)
+  (struct let verbosity = 1 end)
+  (Buckets.Make (Clauses.Make (O)))
 
 let _ =
   if Array.length Sys.argv = 1 then
@@ -15,5 +19,5 @@ let _ =
     (match Sat.sat nb_vars nb_clauses clauses with
     | Sat.Unsat -> Printf.printf "Unsat"
     | Sat.Sat l -> Printf.printf "Sat\n";
-      Pretty.list (Pretty.list Pretty.int) l);
+      Pretty.int_list l);
     print_newline ()

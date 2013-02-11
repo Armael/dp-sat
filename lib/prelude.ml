@@ -51,6 +51,15 @@ let rec fold_stop f acc = function
              else
                new_acc
 
+(* Just like List.map, but f returns a option type. For a given, if
+   the result is None, the element is ignored, otherwise the content of
+   the Some _ is mapped *)
+let rec map_some f = function
+  | [] -> []
+  | x::xs -> match f x with
+    | None -> map_some f xs
+    | Some y -> y::(map_some f xs)
+
 (* Just like List.map, but removes items for which f returns []. *)
 let rec map_skip f = function
   | [] -> []
