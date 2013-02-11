@@ -17,7 +17,10 @@ let _ =
     let (nb_vars, nb_clauses, clauses) = Parser.parse Sys.argv.(1) in
 
     (match Sat.sat nb_vars nb_clauses clauses with
-    | Sat.Unsat -> Printf.printf "Unsat"
-    | Sat.Sat l -> Printf.printf "Sat\n";
-      Pretty.int_list l);
-    print_newline ()
+    | Sat.Unsat -> Printf.printf "s UNSATISFIABLE"
+    | Sat.Sat l -> Printf.printf "s SATISFIABLE\n";
+      if Verif.verif nb_vars nb_clauses clauses l then
+        Printf.printf "c Verification OK\n"
+      else Printf.printf "c Verification FAILED\n";
+      List.iter (fun v -> Printf.printf "v %d\n" v) l);
+
