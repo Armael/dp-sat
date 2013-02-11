@@ -151,7 +151,7 @@ struct
         ) (fst buckets.(k));
 
       ) buckets_seq;
-      (* Here we know the problem is SAT. We have to find an assignation
+      (* Here we know the problem is SAT. We have to find an assignment
          of the variables *)
       Sat []
     ) with Unsat_exc -> Unsat
