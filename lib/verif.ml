@@ -1,6 +1,7 @@
 open Prelude
 
-(* Returns true if the list of values 'values' satisfy the clause, and false otherwise.
+(* Returns true if the list of values 'values' satisfy the clause, and
+   false otherwise.
 
    The list 'values' contains integers : -3 means for example that the
    variable 3 is false
