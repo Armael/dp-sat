@@ -75,7 +75,7 @@ struct
     *)
     let sort c = List.sort compare_vars c in
     (* map_skip removes empty clauses *)
-    map_skip (fun c -> c |> sort |> remove_dup_opp) clauses
+    map_skip (fun c -> c |> sort |> remove_dup |> remove_dup_opp) clauses
 
   (* Raised when we find an empty clause in the buckets *)
   exception Unsat_exc
