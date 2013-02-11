@@ -6,7 +6,7 @@ module O = struct
   let compare = compare
 end
 
-module Sat = Putnam.Solver
+module Sat = Dp.Solver
   (struct let verbosity = 1 end)
   (Buckets.Make (Clauses.Make (O)))
 
