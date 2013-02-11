@@ -151,8 +151,39 @@ struct
         ) (fst buckets.(k));
 
       ) buckets_seq;
+
       (* Here we know the problem is SAT. We have to find an assignment
          of the variables *)
-      Sat []
+      let assign = Hashtbl.create nb_vars in
+      let buckets_seq = List.rev buckets_seq in
+      (* Hashtbl.find modified to fix an arbitrary value (and return
+         it) in case of fail *)
+      let find x = try Hashtbl.find assign x with
+          Not_found -> Hashtbl.add assign x true; true in
+
+      List.iter (fun k ->
+        (* Set of clauses unsatisfied with only the assignment of
+           precedent variables *)
+        let unsat =
+          CSet.filter (function
+          | [] | [_] -> true
+          | x::xs -> not (
+            List.exists (fun var ->
+              if var > 0 then find var
+              else not (find (-var))) xs
+          )) (CSet.union (fst (bucket k)) (snd (bucket k))) in
+        if CSet.is_empty unsat then
+          (* We can use any value of our choice for variable k
+             (variables start from 1) as all the clauses are
+             satisfied *)
+          Hashtbl.add assign k true
+        else
+          let x = List.hd (CSet.choose unsat) in
+          Hashtbl.add assign (abs x) (x > 0)
+      ) buckets_seq;
+
+      Sat (List.map (fun v ->
+        if Hashtbl.find assign v then v else -v)
+             buckets_seq)
     ) with Unsat_exc -> Unsat
 end
