@@ -76,5 +76,5 @@ struct
   let iter = List.iter
 
   (* Use clauses_set to have subset optimization *)
-  let subset = failwith "Not implemented : you may want to use Clauses_set"
+  let subset c1 c2 = failwith "Not implemented : you may want to use Clauses_set"
 end
