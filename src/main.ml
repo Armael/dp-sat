@@ -7,7 +7,7 @@ module O = struct
 end
 
 module Sat = Dp.Solver
-  (struct let verbosity = 1 end)
+  (struct let verbosity = 0 end)
   (Buckets.Make 
      (Bucket_optiset.Make
         (Clauses_set.Make (O))))
