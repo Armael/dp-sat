@@ -40,6 +40,10 @@ struct
     let compare = compare_vars
   end
 
+  (* Order on the clauses : we can use here the standard structural
+     order *)
+  let compare = compare
+
   (* Removes the duplicated variables in a clause. Moreover, if the
      clause contains x and -x, [] is returned *)
   let remove_dup_opp l =
@@ -70,4 +74,7 @@ struct
     ) with Failure _ -> None
 
   let iter = List.iter
+
+  (* Use clauses_set to have subset optimization *)
+  let subset = failwith "Not implemented : you may want to use Clauses_set"
 end

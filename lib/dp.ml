@@ -87,7 +87,7 @@ struct
       (* Hashtbl.find modified to fix an arbitrary value (and return
          it) in case of fail *)
       let find x = try Hashtbl.find assign x with
-          Not_found -> Hashtbl.add assign x true; true in
+          Not_found -> Hashtbl.add assign x false; false in
 
       List.iter (fun k ->
         let bucket = Buckets.get k buckets in
@@ -108,7 +108,7 @@ struct
           (* We can use any value of our choice for variable k
              (variables start from 1) as all the clauses are
              satisfied *)
-          Hashtbl.add assign k true
+          Hashtbl.add assign k false
         else
           let x = Buckets.Clauses.highest_var (Buckets.choose unsat) in
           Hashtbl.add assign (abs x) (x > 0)

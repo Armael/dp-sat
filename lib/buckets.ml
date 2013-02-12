@@ -1,52 +1,45 @@
 open Prelude
 open Sigs
 
-module Make = functor (C : Clauses) ->
+module Make = functor (B : Bucket) ->
 struct
-  module Clauses = C
+  module Clauses = B.Clauses
 
-  (* Set of clauses : will be our buckets *)
-  module CSet = Set.Make
-    (struct
-      type t = C.t
-      let compare = compare
-     end)
-
-  type bucket = CSet.t * CSet.t
+  type bucket = B.t * B.t
   type t = bucket array
 
-  let make n = Array.make n (CSet.empty, CSet.empty)
+  let make n = Array.make n (B.empty, B.empty)
 
   (* Put a clause in the buckets.  There is a "i-1" because variables
      names start from 1 and not from 0 *)
   let put c a =
-    if not (C.is_empty c) then 
-      let i = abs (C.highest_var c) in
-      let put_fun = if C.highest_var c > 0 then put_fst else put_snd in
-      a.(i-1) <- put_fun a.(i-1) (CSet.add c)
+    if not (Clauses.is_empty c) then 
+      let i = abs (Clauses.highest_var c) in
+      let put_fun = if Clauses.highest_var c > 0 then put_fst else put_snd in
+      a.(i-1) <- put_fun a.(i-1) (B.add c)
 
 
   let get i a = a.(i-1)
   let set bucket i a = a.(i-1) <- bucket
 
   let iter f bucket =
-    CSet.iter f (fst bucket);
-    CSet.iter f (snd bucket)
+    B.iter f (fst bucket);
+    B.iter f (snd bucket)
 
   let iter_opposite f bucket =
-    CSet.iter (fun c1 ->
-      CSet.iter (fun c2 ->
+    B.iter (fun c1 ->
+      B.iter (fun c2 ->
         f c1 c2
       ) (snd bucket)
     ) (fst bucket)
 
-  let filter f bucket = (CSet.filter f (fst bucket),
-                         CSet.filter f (snd bucket))
+  let filter f bucket = (B.filter f (fst bucket),
+                         B.filter f (snd bucket))
   let is_empty bucket =
-    (CSet.is_empty (fst bucket)) && (CSet.is_empty (snd bucket))
+    (B.is_empty (fst bucket)) && (B.is_empty (snd bucket))
   let choose bucket =
-    if not (CSet.is_empty (fst bucket)) then CSet.choose (fst bucket)
-    else CSet.choose (snd bucket)
+    if not (B.is_empty (fst bucket)) then B.choose (fst bucket)
+    else B.choose (snd bucket)
   let card bucket =
-    (CSet.cardinal (fst bucket)) + (CSet.cardinal (snd bucket))
+    (B.cardinal (fst bucket)) + (B.cardinal (snd bucket))
 end
