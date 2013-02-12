@@ -1,0 +1,96 @@
+Compilation
+===========
+
+Pour compiler le projet, taper simplement
+
+    make
+
+Seront alors compilés deux binaires, main.native (le binaire du
+sat-solver) lui-même, et generator.native, un générateur d'instances
+aléatoires
+
+Pour lancer le solveur sur une instance, si celle-ci est stockée dans
+le fichier instance.cnf, lancer :
+
+     ./main.native instance.cnf
+
+Question partie 2
+=================
+
+Lorsque, après la propagation à travers les buckets, on sait qu'une
+formule est satisfiable, on dispose encore du contenu de ceux-ci.  On
+remonte alors, partant des buckets d'indices les plus petits (ceux
+avec lesquels on a fini), en effectuant l'algorithme suivant :
+
+- On connaît une assignation des variables d'indices < i lorsque l'on
+  arrive au bucket i
+
+- Si toutes les clauses du bucket i sont satisfaites uniquement par
+  l'assignation des variables d'indices < i, on choisit une valeur au
+  hasard pour la variable i
+
+- Sinon, toutes les clauses qui ne sont pas satisfaites ont la même
+  « polarité » pour la variable i (i ou non i), sinon le problème ne
+  serait pas satisfiable. On choisit alors une clause quelconque parmi
+  celles non satisfaites et on regarde la polarité de la variable i et
+  on choisit son assignation pour satisfaire la clause.
+
+- On passe au bucket i+1
+
+Mise à l'épreuve du programme
+=============================
+
+Je n'ai pas eu le temps d'écrire un programme intelligent pour générer
+des clauses difficiles (je pensais à une solution gloutonne qui tout
+d'abord essaye d'avoir autant de variables i que -i, puis qui,
+lorsqu'elle rajoute un littéral à une clause, le fait de manière à
+maximiser le nombre de combinaisons non simplifiantes avec les autres
+clauses présentes à cet instant).
+
+J'ai donc uniquement un programme idiot (generator.native) qui génère
+des instances aléatoires. J'ai généré un jeu d'instances de difficulté
+croissante que l'on peut trouver dans le dossier mytests/
+
+dans l'ordre :
+
+test.cnf > test2.cnf > t0 > t1 > t2 > t3 > t4
+
+Le test t2 prend environ 2 minutes, les tests t3 et t4 plus de 5
+minutes.
+
+Les fichiers de test fournis (ex1.cnf ... ex5.cnf) sont résolus en
+quelques secondes.
+
+./main.native tests/ex1.cnf  2,46s user 0,01s system 99% cpu 2,475 total
+./main.native tests/ex2.cnf  1,99s user 0,00s system 99% cpu 2,004 total
+./main.native tests/ex3.cnf  2,08s user 0,01s system 99% cpu 2,100 total
+./main.native tests/ex4.cnf  3,57s user 0,00s system 99% cpu 3,582 total
+./main.native tests/ex5.cnf  0,67s user 0,00s system 99% cpu 0,672 total
+
+Détails d'implémentation
+========================
+
+L'implémentation tente d'être très modulaire : l'implémentation des
+clauses, buckets et ensemble de buckets est abstraite par le système
+de modules/interfaces de Caml, et j'utilise des foncteurs pour
+combiner le tout.
+
+Les littéraux ne sont pas abstraits et sont représentés par des int,
+ce qui permet d'utiliser l'indempotence de - comme pour not, ce qui
+est bien pratique.
+
+Il y a en particulier plusieurs implémentation pour la signature Bucket :
+  Bucket_set.Make et Bucket_optiset.Make
+ainsi que pour la signature Clause :
+  Clause.Make et Clause_set.Make
+
+L'implémentation la plus naïve présente est en utilisant Bucket_set et
+Clause, les clauses sont représentées naïvement par des listes triées
+(sans doublons), et les buckets par des ensembles, ce qui permet déja
+d'éviter les clauses en double - avec ceci on résout l'exemple 1 en
+~5minutes et l'exemple 2 en ~20 minutes.
+
+L'implémentation utilisant Bucket_optiset et Clause_set permet de
+générer encore moins de clause puisque l'on élimine les clauses
+incluses les unes dans les autres. Cependant, il y a un surcoût en
+temps assez important à l'insertion d'une clause dans un bucket.
